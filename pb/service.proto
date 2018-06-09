@@ -14,10 +14,20 @@ service TimeRecord {
 }
 
 enum JobStatus {
-	NEW = 0;
-	STARTED = 1;
-	PAUSED = 2;
-	FINISHED = 3;
+	NONE = 0;
+	NEW = 1;
+	STARTED = 2;
+	PAUSED = 3;
+	FINISHED = 4;
+}
+
+enum Error {
+	NIL = 0;
+	OK = 200;
+	CREATED = 201;
+	ACCEPTED = 202;
+	BADREQUEST = 400;
+	NOTFOUND = 404;
 }
 
 message TimeRequest {
@@ -29,5 +39,5 @@ message TimeRequest {
 message Confirmation {
 	int32 jobID = 1;
 	JobStatus jobStatus = 2;
-	bool error = 3;
+	Error error = 3;
 }

@@ -68,10 +68,7 @@ func (s *server) CompleteTimer(ctx context.Context, in *pb.TimeRequest) (*pb.Con
 
 // Returns new ID using the length of tasks, as int32
 func getNewID() int32 {
-	if len(tasks) > 0 {
-		return int32(len(tasks) + 1)
-	}
-	return int32(1)
+	return int32(len(tasks) + 1)
 }
 
 func main() {

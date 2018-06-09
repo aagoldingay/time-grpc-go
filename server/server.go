@@ -10,6 +10,7 @@ import (
 	"time"
 	pb "time-grpc/pb"
 
+	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -40,10 +41,11 @@ func (s *server) InitiateTimer(ctx context.Context, in *pb.TimeRequest) (*pb.Con
 	if in.GetJobID() == 0 {
 		id := getNewID()
 		status := pb.JobStatus_value[in.GetJobStatus().String()]
-		t, err := time.Parse(TimeFormat, in.GetTimer().String())
+		t, err := ptypes.Timestamp(in.GetTimer())
 		if err != nil {
-			log.Printf("date provided is invalid [ID:%b; TIME:%v", id, t)
+			log.Printf("date provided is invalid [ID:%b; TIME:%v]", id, t)
 		}
+		t = t.Add(time.Hour * 1)
 		tasks[id] = &Task{id, status, t, 0.00}
 		log.Printf("NEW TASK: %b - start time = %v", id, t)
 		return &pb.Confirmation{JobID: id, JobStatus: pb.JobStatus_NEW, Error: pb.Error_CREATED}, nil
@@ -57,7 +59,7 @@ func (s *server) CompleteTimer(ctx context.Context, in *pb.TimeRequest) (*pb.Con
 	if _, exists := tasks[id]; exists {
 		t, err := time.Parse(TimeFormat, in.GetTimer().String())
 		if err != nil {
-			log.Printf("date provided is invalid [ID:%b; TIME:%v", id, t)
+			log.Printf("date provided is invalid [ID:%b; TIME:%v]", id, t)
 		}
 		dur := t.Sub(tasks[id].StartTime).Hours()
 		tasks[id].TotalTime += dur

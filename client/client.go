@@ -25,4 +25,5 @@ func main() {
 
 	response, err := c.InitiateTimer(context.Background(), &pb.NewTimeRequest{Timer: ptypes.TimestampNow()})
 	fmt.Println(response)
+	response, err = c.InitiateTimer(context.Background(), &pb.NewTimeRequest{Timer: ptypes.TimestampNow()})
 }

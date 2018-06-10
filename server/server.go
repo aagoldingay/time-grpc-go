@@ -44,11 +44,11 @@ func (s *server) InitiateTimer(ctx context.Context, in *pb.NewTimeRequest) (*pb.
 	id := getNewID()
 	t, err := ptypes.Timestamp(in.GetTimer())
 	if err != nil {
-		log.Printf("date provided is invalid [ID:%b; TIME:%v]", id, t)
+		log.Printf("date provided is invalid [ID:%d; TIME:%v]", id, t)
 	}
 	t = t.Add(time.Hour * 1)
 	tasks[id] = &Task{id, 1, t, 0.00}
-	log.Printf("NEW TASK: %b - start time = %v", id, t)
+	log.Printf("NEW TASK: %d - start time = %v", id, t)
 	return &pb.Confirmation{JobID: id, JobStatus: pb.JobStatus_NEW, Error: pb.Error_CREATED}, nil
 }
 
@@ -58,7 +58,7 @@ func (s *server) CompleteTimer(ctx context.Context, in *pb.CompleteRequest) (*pb
 	if _, exists := tasks[id]; exists {
 		t, err := time.Parse(TimeFormat, in.GetTimer().String())
 		if err != nil {
-			log.Printf("date provided is invalid [ID:%b; TIME:%v]", id, t)
+			log.Printf("date provided is invalid [ID:%d; TIME:%v]", id, t)
 		}
 		dur := t.Sub(tasks[id].StartTime).Hours()
 		tasks[id].TotalTime += dur

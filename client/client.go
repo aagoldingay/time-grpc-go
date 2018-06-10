@@ -23,6 +23,6 @@ func main() {
 	defer conn.Close()
 	c := pb.NewTimeRecordClient(conn)
 
-	response, err := c.InitiateTimer(context.Background(), &pb.TimeRequest{JobID: 0, Timer: ptypes.TimestampNow(), JobStatus: pb.JobStatus_NEW})
+	response, err := c.InitiateTimer(context.Background(), &pb.NewTimeRequest{Timer: ptypes.TimestampNow()})
 	fmt.Println(response)
 }

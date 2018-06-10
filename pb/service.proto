@@ -7,10 +7,10 @@ import "google/protobuf/timestamp.proto";
 // TimeRecord service definition
 service TimeRecord {
 	// Sends a time request to the server to initiate a new job record
-	rpc InitiateTimer (TimeRequest) returns (Confirmation) {}
+	rpc InitiateTimer (NewTimeRequest) returns (Confirmation) {}
 
 	// Sends a time request to the server to complete a job request
-	rpc CompleteTimer (TimeRequest) returns (Confirmation) {}
+	rpc CompleteTimer (CompleteRequest) returns (Confirmation) {}
 }
 
 enum JobStatus {
@@ -30,14 +30,17 @@ enum Error {
 	NOTFOUND = 404;
 }
 
-message TimeRequest {
-	int32 jobID = 1;
-	google.protobuf.Timestamp timer = 2;
-	JobStatus jobStatus = 3;
-}
-
 message Confirmation {
 	int32 jobID = 1;
 	JobStatus jobStatus = 2;
 	Error error = 3;
+}
+
+message CompleteRequest {
+	int32 jobID = 1;
+	google.protobuf.Timestamp timer = 2;
+}
+
+message NewTimeRequest {
+	google.protobuf.Timestamp timer = 2;
 }

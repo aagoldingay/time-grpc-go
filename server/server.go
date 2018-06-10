@@ -16,9 +16,11 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
+// protoc -I pb/ pb/service.proto --go_out=plugins=grpc:pb
+
 const (
-	// PORT defines port to listen to
-	PORT = ":50051"
+	// Port defines port to listen to
+	Port = ":50051"
 
 	// TimeFormat defines format for Time
 	TimeFormat = "2006-01-02T15:04:05.000Z"
@@ -38,24 +40,20 @@ type Task struct {
 var tasks = make(map[int32]*Task)
 
 // InitiateTimer implements pb.TimeRecord
-func (s *server) InitiateTimer(ctx context.Context, in *pb.TimeRequest) (*pb.Confirmation, error) {
-	if in.GetJobID() == 0 {
-		id := getNewID()
-		status := pb.JobStatus_value[in.GetJobStatus().String()]
-		t, err := ptypes.Timestamp(in.GetTimer())
-		if err != nil {
-			log.Printf("date provided is invalid [ID:%b; TIME:%v]", id, t)
-		}
-		t = t.Add(time.Hour * 1)
-		tasks[id] = &Task{id, status, t, 0.00}
-		log.Printf("NEW TASK: %b - start time = %v", id, t)
-		return &pb.Confirmation{JobID: id, JobStatus: pb.JobStatus_NEW, Error: pb.Error_CREATED}, nil
+func (s *server) InitiateTimer(ctx context.Context, in *pb.NewTimeRequest) (*pb.Confirmation, error) {
+	id := getNewID()
+	t, err := ptypes.Timestamp(in.GetTimer())
+	if err != nil {
+		log.Printf("date provided is invalid [ID:%b; TIME:%v]", id, t)
 	}
-	return &pb.Confirmation{JobID: 0, JobStatus: pb.JobStatus_NONE, Error: pb.Error_BADREQUEST}, nil
+	t = t.Add(time.Hour * 1)
+	tasks[id] = &Task{id, 1, t, 0.00}
+	log.Printf("NEW TASK: %b - start time = %v", id, t)
+	return &pb.Confirmation{JobID: id, JobStatus: pb.JobStatus_NEW, Error: pb.Error_CREATED}, nil
 }
 
 // InitiateTimer implements pb.TimeRecord
-func (s *server) CompleteTimer(ctx context.Context, in *pb.TimeRequest) (*pb.Confirmation, error) {
+func (s *server) CompleteTimer(ctx context.Context, in *pb.CompleteRequest) (*pb.Confirmation, error) {
 	id := in.GetJobID()
 	if _, exists := tasks[id]; exists {
 		t, err := time.Parse(TimeFormat, in.GetTimer().String())
@@ -66,7 +64,7 @@ func (s *server) CompleteTimer(ctx context.Context, in *pb.TimeRequest) (*pb.Con
 		tasks[id].TotalTime += dur
 		return &pb.Confirmation{JobID: id, JobStatus: pb.JobStatus_FINISHED, Error: pb.Error_OK}, nil
 	}
-	return &pb.Confirmation{JobID: id, JobStatus: in.GetJobStatus(), Error: pb.Error_NOTFOUND}, nil
+	return &pb.Confirmation{JobID: id, JobStatus: pb.JobStatus_NEW, Error: pb.Error_NOTFOUND}, nil
 }
 
 // Returns new ID using the length of tasks, as int32
@@ -78,7 +76,7 @@ func main() {
 	stop := make(chan os.Signal)
 	signal.Notify(stop, os.Interrupt)
 
-	lis, err := net.Listen("tcp", PORT)
+	lis, err := net.Listen("tcp", Port)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

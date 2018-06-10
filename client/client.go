@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
-	pb "time-grpc/pb"
+
+	pb "github.com/aagoldingay/time-grpc-go/pb"
 
 	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/grpc"

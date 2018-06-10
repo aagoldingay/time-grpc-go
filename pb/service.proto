@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package pb;
 
-import "google/protobuf/timestamp.proto";
-
 // TimeRecord service definition
 service TimeRecord {
 	// Sends a time request to the server to initiate a new job record
@@ -38,9 +36,8 @@ message Confirmation {
 
 message CompleteRequest {
 	int32 jobID = 1;
-	google.protobuf.Timestamp timer = 2;
 }
 
 message NewTimeRequest {
-	google.protobuf.Timestamp timer = 2;
+	bool new = 1;
 }

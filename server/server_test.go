@@ -6,26 +6,13 @@ import (
 	"time"
 
 	pb "github.com/aagoldingay/time-grpc-go/pb"
-	"github.com/golang/protobuf/ptypes"
 )
 
 func Test_InitiateTimer(t *testing.T) {
 	s := server{}
-	stamp, _ := time.Parse(TimeFormat, "2018-06-10T19:30:45.000Z")
-	tests := []struct {
-		time time.Time
-	}{
-		{
-			time: time.Now(),
-		},
-		{
-			time: stamp,
-		},
-	}
 
-	for _, tst := range tests {
-		ts, _ := ptypes.TimestampProto(tst.time)
-		req := &pb.NewTimeRequest{Timer: ts}
+	for i := 0; i < 2; i++ {
+		req := &pb.NewTimeRequest{New: true}
 		resp, err := s.InitiateTimer(context.Background(), req)
 		if err != nil {
 			t.Errorf("InitiateTimer(%v) got unexpected error", req)
@@ -37,6 +24,12 @@ func Test_InitiateTimer(t *testing.T) {
 			t.Errorf("InitiateTimer(%v)=%v, wanted %v", req, resp.JobStatus, pb.JobStatus_NEW)
 		}
 	}
+	if _, exists := tasks[1]; !exists {
+		t.Errorf("Object 1 do not exist in task map")
+	}
+	if _, exists := tasks[2]; !exists {
+		t.Errorf("Object 2 do not exist in task map")
+	}
 }
 
 func Test_CompleteTimerSuccessful(t *testing.T) {
@@ -46,22 +39,18 @@ func Test_CompleteTimerSuccessful(t *testing.T) {
 	stamp, _ := time.Parse(TimeFormat, "2018-06-10T19:30:45.000Z")
 	tasks[2] = &Task{ID: 2, StartTime: stamp, TotalTime: 0.10}
 	tests := []struct {
-		id   int32
-		time time.Time
+		id int32
 	}{
 		{
-			id:   1,
-			time: time.Now(),
+			id: 1,
 		},
 		{
-			id:   2,
-			time: stamp,
+			id: 2,
 		},
 	}
 
 	for _, tst := range tests {
-		ts, _ := ptypes.TimestampProto(tst.time)
-		req := &pb.CompleteRequest{JobID: tst.id, Timer: ts}
+		req := &pb.CompleteRequest{JobID: tst.id}
 		resp, err := s.CompleteTimer(context.Background(), req)
 		if err != nil {
 			t.Errorf("InitiateTimer(%v) got unexpected error", req)
@@ -71,6 +60,10 @@ func Test_CompleteTimerSuccessful(t *testing.T) {
 		}
 		if resp.JobStatus != pb.JobStatus_FINISHED {
 			t.Errorf("InitiateTimer(%v)=%v, wanted %v", req, resp.JobStatus, pb.JobStatus_FINISHED)
+		}
+		val, _ := tasks[tst.id]
+		if val.Status != 4 {
+			t.Errorf("Task %d status is not finished", tst.id)
 		}
 	}
 }
@@ -96,8 +89,7 @@ func Test_CompleteTimerUnSuccessful(t *testing.T) {
 	}
 
 	for _, tst := range tests {
-		ts, _ := ptypes.TimestampProto(tst.time)
-		req := &pb.CompleteRequest{JobID: tst.id, Timer: ts}
+		req := &pb.CompleteRequest{JobID: tst.id}
 		resp, err := s.CompleteTimer(context.Background(), req)
 		if err != nil {
 			t.Errorf("InitiateTimer(%v) got unexpected error", req)
@@ -105,7 +97,7 @@ func Test_CompleteTimerUnSuccessful(t *testing.T) {
 		if resp.Error != pb.Error_NOTFOUND {
 			t.Errorf("InitaiteTimer(%v)=%v, wanted %v", req, resp.Error, pb.Error_NOTFOUND)
 		}
-		if resp.JobStatus != pb.JobStatus_NEW {
+		if resp.JobStatus != pb.JobStatus_FINISHED {
 			t.Errorf("InitiateTimer(%v)=%v, wanted %v", req, resp.JobStatus, pb.JobStatus_NEW)
 		}
 	}

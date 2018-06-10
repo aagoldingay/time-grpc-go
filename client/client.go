@@ -7,7 +7,6 @@ import (
 
 	pb "github.com/aagoldingay/time-grpc-go/pb"
 
-	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/grpc"
 )
 
@@ -23,7 +22,9 @@ func main() {
 	defer conn.Close()
 	c := pb.NewTimeRecordClient(conn)
 
-	response, err := c.InitiateTimer(context.Background(), &pb.NewTimeRequest{Timer: ptypes.TimestampNow()})
+	response, err := c.InitiateTimer(context.Background(), &pb.NewTimeRequest{New: true})
 	fmt.Println(response)
-	response, err = c.InitiateTimer(context.Background(), &pb.NewTimeRequest{Timer: ptypes.TimestampNow()})
+
+	response, err = c.CompleteTimer(context.Background(), &pb.CompleteRequest{JobID: 1})
+	fmt.Println(response)
 }

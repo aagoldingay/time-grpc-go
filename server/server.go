@@ -11,7 +11,6 @@ import (
 
 	pb "github.com/aagoldingay/time-grpc-go/pb"
 
-	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -42,11 +41,7 @@ var tasks = make(map[int32]*Task)
 // InitiateTimer implements pb.TimeRecord
 func (s *server) InitiateTimer(ctx context.Context, in *pb.NewTimeRequest) (*pb.Confirmation, error) {
 	id := getNewID()
-	t, err := ptypes.Timestamp(in.GetTimer())
-	if err != nil {
-		log.Printf("date provided is invalid [ID:%d; TIME:%v]", id, t)
-	}
-	t = t.Add(time.Hour * 1)
+	t := time.Now()
 	tasks[id] = &Task{id, 1, t, 0.00}
 	log.Printf("NEW TASK: %d - start time = %v", id, t)
 	return &pb.Confirmation{JobID: id, JobStatus: pb.JobStatus_NEW, Error: pb.Error_CREATED}, nil
@@ -56,12 +51,9 @@ func (s *server) InitiateTimer(ctx context.Context, in *pb.NewTimeRequest) (*pb.
 func (s *server) CompleteTimer(ctx context.Context, in *pb.CompleteRequest) (*pb.Confirmation, error) {
 	id := in.GetJobID()
 	if _, exists := tasks[id]; exists {
-		t, err := time.Parse(TimeFormat, in.GetTimer().String())
-		if err != nil {
-			log.Printf("date provided is invalid [ID:%d; TIME:%v]", id, t)
-		}
-		dur := t.Sub(tasks[id].StartTime).Hours()
-		tasks[id].TotalTime += dur
+		tasks[id].TotalTime += time.Since(tasks[id].StartTime).Hours()
+		tasks[id].Status = pb.JobStatus_value[pb.JobStatus_FINISHED.String()]
+		log.Printf("TASK COMPLETED: %d - duration = %.2f hour(s)", id, tasks[id].TotalTime)
 		return &pb.Confirmation{JobID: id, JobStatus: pb.JobStatus_FINISHED, Error: pb.Error_OK}, nil
 	}
 	return &pb.Confirmation{JobID: id, JobStatus: pb.JobStatus_NEW, Error: pb.Error_NOTFOUND}, nil

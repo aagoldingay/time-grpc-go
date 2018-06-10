@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/aagoldingay/time-grpc-go.svg?branch=dev)](https://travis-ci.org/aagoldingay/time-grpc-go)
 # time-grpc
 
 ## Intentions:

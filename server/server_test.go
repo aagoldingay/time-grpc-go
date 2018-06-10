@@ -97,7 +97,7 @@ func Test_CompleteTimerUnSuccessful(t *testing.T) {
 		if resp.Error != pb.Error_NOTFOUND {
 			t.Errorf("InitaiteTimer(%v)=%v, wanted %v", req, resp.Error, pb.Error_NOTFOUND)
 		}
-		if resp.JobStatus != pb.JobStatus_FINISHED {
+		if resp.JobStatus != pb.JobStatus_NEW {
 			t.Errorf("InitiateTimer(%v)=%v, wanted %v", req, resp.JobStatus, pb.JobStatus_NEW)
 		}
 	}

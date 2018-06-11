@@ -41,9 +41,8 @@ var tasks = make(map[int32]*Task)
 // InitiateTimer implements pb.TimeRecord
 func (s *server) InitiateTimer(ctx context.Context, in *pb.NewTimeRequest) (*pb.Confirmation, error) {
 	id := getNewID()
-	t := time.Now()
-	tasks[id] = &Task{id, 1, t, 0.00}
-	log.Printf("NEW TASK: %d - start time = %v", id, t)
+	tasks[id] = &Task{ID: id, Status: 1, TotalTime: 0.00}
+	log.Printf("NEW TASK: %d", id)
 	return &pb.Confirmation{JobID: id, JobStatus: pb.JobStatus_NEW, Error: pb.Error_CREATED}, nil
 }
 

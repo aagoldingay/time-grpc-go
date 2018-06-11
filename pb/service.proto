@@ -4,11 +4,14 @@ package pb;
 
 // TimeRecord service definition
 service TimeRecord {
+	// Sends a time request to the server to complete a job request
+	rpc CompleteTimer (TimeRequest) returns (Confirmation) {}
+
 	// Sends a time request to the server to initiate a new job record
 	rpc InitiateTimer (NewTimeRequest) returns (Confirmation) {}
 
-	// Sends a time request to the server to complete a job request
-	rpc CompleteTimer (CompleteRequest) returns (Confirmation) {}
+	// Sends a time request to the server to run a timer
+	rpc StartTimer (TimeRequest) returns (Confirmation) {}
 }
 
 enum JobStatus {
@@ -34,7 +37,7 @@ message Confirmation {
 	Error error = 3;
 }
 
-message CompleteRequest {
+message TimeRequest {
 	int32 jobID = 1;
 }
 

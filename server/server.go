@@ -38,24 +38,36 @@ type Task struct {
 // data structure - **use Task.ID as identifier**
 var tasks = make(map[int32]*Task)
 
-// InitiateTimer implements pb.TimeRecord
+// InitiateTimer implements pb.TimeRecord - accepts: *pb.TimeRequest
+func (s *server) CompleteTimer(ctx context.Context, in *pb.TimeRequest) (*pb.Confirmation, error) {
+	id := in.GetJobID()
+	if _, exists := tasks[id]; exists {
+		tasks[id].TotalTime += time.Since(tasks[id].StartTime).Hours()
+		tasks[id].Status = pb.JobStatus_value["FINISHED"]
+		log.Printf("TASK COMPLETED: %d - duration = %.2f hour(s)", id, tasks[id].TotalTime)
+		return &pb.Confirmation{JobID: id, JobStatus: pb.JobStatus_FINISHED, Error: pb.Error_OK}, nil
+	}
+	return &pb.Confirmation{JobID: id, JobStatus: pb.JobStatus_NONE, Error: pb.Error_NOTFOUND}, nil
+}
+
+// InitiateTimer implements pb.TimeRecord - accepts: *pb.NewTimeRequest
 func (s *server) InitiateTimer(ctx context.Context, in *pb.NewTimeRequest) (*pb.Confirmation, error) {
 	id := getNewID()
-	tasks[id] = &Task{ID: id, Status: 1, TotalTime: 0.00}
+	tasks[id] = &Task{ID: id, Status: pb.JobStatus_value["NEW"], TotalTime: 0.00}
 	log.Printf("NEW TASK: %d", id)
 	return &pb.Confirmation{JobID: id, JobStatus: pb.JobStatus_NEW, Error: pb.Error_CREATED}, nil
 }
 
-// InitiateTimer implements pb.TimeRecord
-func (s *server) CompleteTimer(ctx context.Context, in *pb.CompleteRequest) (*pb.Confirmation, error) {
+// StartTimer implements pb.TimeRecord - accepts: *pb.TimeRequest
+func (s *server) StartTimer(ctx context.Context, in *pb.TimeRequest) (*pb.Confirmation, error) {
 	id := in.GetJobID()
 	if _, exists := tasks[id]; exists {
-		tasks[id].TotalTime += time.Since(tasks[id].StartTime).Hours()
-		tasks[id].Status = pb.JobStatus_value[pb.JobStatus_FINISHED.String()]
-		log.Printf("TASK COMPLETED: %d - duration = %.2f hour(s)", id, tasks[id].TotalTime)
-		return &pb.Confirmation{JobID: id, JobStatus: pb.JobStatus_FINISHED, Error: pb.Error_OK}, nil
+		tasks[id].StartTime = time.Now()
+		tasks[id].Status = pb.JobStatus_value["STARTED"]
+		log.Printf("TASK %d STARTED", id)
+		return &pb.Confirmation{JobID: id, JobStatus: pb.JobStatus_STARTED, Error: pb.Error_OK}, nil
 	}
-	return &pb.Confirmation{JobID: id, JobStatus: pb.JobStatus_NEW, Error: pb.Error_NOTFOUND}, nil
+	return &pb.Confirmation{JobID: id, JobStatus: pb.JobStatus_NONE, Error: pb.Error_NOTFOUND}, nil
 }
 
 // Returns new ID using the length of tasks, as int32

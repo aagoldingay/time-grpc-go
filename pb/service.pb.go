@@ -52,7 +52,7 @@ func (x JobStatus) String() string {
 	return proto.EnumName(JobStatus_name, int32(x))
 }
 func (JobStatus) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_service_ab60d11d5d8c8b68, []int{0}
+	return fileDescriptor_service_58b98c7d361f9947, []int{0}
 }
 
 type Error int32
@@ -87,7 +87,7 @@ func (x Error) String() string {
 	return proto.EnumName(Error_name, int32(x))
 }
 func (Error) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_service_ab60d11d5d8c8b68, []int{1}
+	return fileDescriptor_service_58b98c7d361f9947, []int{1}
 }
 
 type Confirmation struct {
@@ -103,7 +103,7 @@ func (m *Confirmation) Reset()         { *m = Confirmation{} }
 func (m *Confirmation) String() string { return proto.CompactTextString(m) }
 func (*Confirmation) ProtoMessage()    {}
 func (*Confirmation) Descriptor() ([]byte, []int) {
-	return fileDescriptor_service_ab60d11d5d8c8b68, []int{0}
+	return fileDescriptor_service_58b98c7d361f9947, []int{0}
 }
 func (m *Confirmation) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Confirmation.Unmarshal(m, b)
@@ -144,38 +144,38 @@ func (m *Confirmation) GetError() Error {
 	return Error_NIL
 }
 
-type CompleteRequest struct {
+type TimeRequest struct {
 	JobID                int32    `protobuf:"varint,1,opt,name=jobID,proto3" json:"jobID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *CompleteRequest) Reset()         { *m = CompleteRequest{} }
-func (m *CompleteRequest) String() string { return proto.CompactTextString(m) }
-func (*CompleteRequest) ProtoMessage()    {}
-func (*CompleteRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_service_ab60d11d5d8c8b68, []int{1}
+func (m *TimeRequest) Reset()         { *m = TimeRequest{} }
+func (m *TimeRequest) String() string { return proto.CompactTextString(m) }
+func (*TimeRequest) ProtoMessage()    {}
+func (*TimeRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_service_58b98c7d361f9947, []int{1}
 }
-func (m *CompleteRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_CompleteRequest.Unmarshal(m, b)
+func (m *TimeRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TimeRequest.Unmarshal(m, b)
 }
-func (m *CompleteRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_CompleteRequest.Marshal(b, m, deterministic)
+func (m *TimeRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TimeRequest.Marshal(b, m, deterministic)
 }
-func (dst *CompleteRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CompleteRequest.Merge(dst, src)
+func (dst *TimeRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TimeRequest.Merge(dst, src)
 }
-func (m *CompleteRequest) XXX_Size() int {
-	return xxx_messageInfo_CompleteRequest.Size(m)
+func (m *TimeRequest) XXX_Size() int {
+	return xxx_messageInfo_TimeRequest.Size(m)
 }
-func (m *CompleteRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_CompleteRequest.DiscardUnknown(m)
+func (m *TimeRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_TimeRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_CompleteRequest proto.InternalMessageInfo
+var xxx_messageInfo_TimeRequest proto.InternalMessageInfo
 
-func (m *CompleteRequest) GetJobID() int32 {
+func (m *TimeRequest) GetJobID() int32 {
 	if m != nil {
 		return m.JobID
 	}
@@ -193,7 +193,7 @@ func (m *NewTimeRequest) Reset()         { *m = NewTimeRequest{} }
 func (m *NewTimeRequest) String() string { return proto.CompactTextString(m) }
 func (*NewTimeRequest) ProtoMessage()    {}
 func (*NewTimeRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_service_ab60d11d5d8c8b68, []int{2}
+	return fileDescriptor_service_58b98c7d361f9947, []int{2}
 }
 func (m *NewTimeRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_NewTimeRequest.Unmarshal(m, b)
@@ -222,7 +222,7 @@ func (m *NewTimeRequest) GetNew() bool {
 
 func init() {
 	proto.RegisterType((*Confirmation)(nil), "pb.Confirmation")
-	proto.RegisterType((*CompleteRequest)(nil), "pb.CompleteRequest")
+	proto.RegisterType((*TimeRequest)(nil), "pb.TimeRequest")
 	proto.RegisterType((*NewTimeRequest)(nil), "pb.NewTimeRequest")
 	proto.RegisterEnum("pb.JobStatus", JobStatus_name, JobStatus_value)
 	proto.RegisterEnum("pb.Error", Error_name, Error_value)
@@ -240,10 +240,12 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type TimeRecordClient interface {
+	// Sends a time request to the server to complete a job request
+	CompleteTimer(ctx context.Context, in *TimeRequest, opts ...grpc.CallOption) (*Confirmation, error)
 	// Sends a time request to the server to initiate a new job record
 	InitiateTimer(ctx context.Context, in *NewTimeRequest, opts ...grpc.CallOption) (*Confirmation, error)
-	// Sends a time request to the server to complete a job request
-	CompleteTimer(ctx context.Context, in *CompleteRequest, opts ...grpc.CallOption) (*Confirmation, error)
+	// Sends a time request to the server to run a timer
+	StartTimer(ctx context.Context, in *TimeRequest, opts ...grpc.CallOption) (*Confirmation, error)
 }
 
 type timeRecordClient struct {
@@ -252,6 +254,15 @@ type timeRecordClient struct {
 
 func NewTimeRecordClient(cc *grpc.ClientConn) TimeRecordClient {
 	return &timeRecordClient{cc}
+}
+
+func (c *timeRecordClient) CompleteTimer(ctx context.Context, in *TimeRequest, opts ...grpc.CallOption) (*Confirmation, error) {
+	out := new(Confirmation)
+	err := c.cc.Invoke(ctx, "/pb.TimeRecord/CompleteTimer", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *timeRecordClient) InitiateTimer(ctx context.Context, in *NewTimeRequest, opts ...grpc.CallOption) (*Confirmation, error) {
@@ -263,9 +274,9 @@ func (c *timeRecordClient) InitiateTimer(ctx context.Context, in *NewTimeRequest
 	return out, nil
 }
 
-func (c *timeRecordClient) CompleteTimer(ctx context.Context, in *CompleteRequest, opts ...grpc.CallOption) (*Confirmation, error) {
+func (c *timeRecordClient) StartTimer(ctx context.Context, in *TimeRequest, opts ...grpc.CallOption) (*Confirmation, error) {
 	out := new(Confirmation)
-	err := c.cc.Invoke(ctx, "/pb.TimeRecord/CompleteTimer", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/pb.TimeRecord/StartTimer", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -274,14 +285,34 @@ func (c *timeRecordClient) CompleteTimer(ctx context.Context, in *CompleteReques
 
 // TimeRecordServer is the server API for TimeRecord service.
 type TimeRecordServer interface {
+	// Sends a time request to the server to complete a job request
+	CompleteTimer(context.Context, *TimeRequest) (*Confirmation, error)
 	// Sends a time request to the server to initiate a new job record
 	InitiateTimer(context.Context, *NewTimeRequest) (*Confirmation, error)
-	// Sends a time request to the server to complete a job request
-	CompleteTimer(context.Context, *CompleteRequest) (*Confirmation, error)
+	// Sends a time request to the server to run a timer
+	StartTimer(context.Context, *TimeRequest) (*Confirmation, error)
 }
 
 func RegisterTimeRecordServer(s *grpc.Server, srv TimeRecordServer) {
 	s.RegisterService(&_TimeRecord_serviceDesc, srv)
+}
+
+func _TimeRecord_CompleteTimer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TimeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TimeRecordServer).CompleteTimer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.TimeRecord/CompleteTimer",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TimeRecordServer).CompleteTimer(ctx, req.(*TimeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _TimeRecord_InitiateTimer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -302,20 +333,20 @@ func _TimeRecord_InitiateTimer_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TimeRecord_CompleteTimer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CompleteRequest)
+func _TimeRecord_StartTimer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TimeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TimeRecordServer).CompleteTimer(ctx, in)
+		return srv.(TimeRecordServer).StartTimer(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/pb.TimeRecord/CompleteTimer",
+		FullMethod: "/pb.TimeRecord/StartTimer",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TimeRecordServer).CompleteTimer(ctx, req.(*CompleteRequest))
+		return srv.(TimeRecordServer).StartTimer(ctx, req.(*TimeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -325,43 +356,47 @@ var _TimeRecord_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*TimeRecordServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "CompleteTimer",
+			Handler:    _TimeRecord_CompleteTimer_Handler,
+		},
+		{
 			MethodName: "InitiateTimer",
 			Handler:    _TimeRecord_InitiateTimer_Handler,
 		},
 		{
-			MethodName: "CompleteTimer",
-			Handler:    _TimeRecord_CompleteTimer_Handler,
+			MethodName: "StartTimer",
+			Handler:    _TimeRecord_StartTimer_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "service.proto",
 }
 
-func init() { proto.RegisterFile("service.proto", fileDescriptor_service_ab60d11d5d8c8b68) }
+func init() { proto.RegisterFile("service.proto", fileDescriptor_service_58b98c7d361f9947) }
 
-var fileDescriptor_service_ab60d11d5d8c8b68 = []byte{
-	// 356 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x6c, 0x51, 0xb1, 0x8e, 0xda, 0x40,
-	0x10, 0xc5, 0x36, 0x06, 0x33, 0xc1, 0xb0, 0x9a, 0xa4, 0x40, 0x69, 0x82, 0xdc, 0x04, 0x11, 0x89,
-	0x82, 0x14, 0x49, 0xeb, 0xd8, 0x8b, 0xe2, 0x24, 0xb2, 0xc9, 0xda, 0x24, 0x35, 0x26, 0x1b, 0xc9,
-	0x28, 0x78, 0x9d, 0x65, 0x09, 0x65, 0x7e, 0xe1, 0x8a, 0xfb, 0xa8, 0xbb, 0xfb, 0xaa, 0xd3, 0xda,
-	0x82, 0x3b, 0x24, 0xba, 0x9d, 0x37, 0xef, 0xcd, 0xbe, 0x79, 0x03, 0xee, 0x9e, 0xcb, 0x7f, 0xc5,
-	0x86, 0xcf, 0x2a, 0x29, 0x94, 0x40, 0xb3, 0xca, 0x3d, 0x09, 0xfd, 0x40, 0x94, 0xbf, 0x0b, 0xb9,
-	0x5b, 0xab, 0x42, 0x94, 0xf8, 0x0a, 0xec, 0xad, 0xc8, 0xa3, 0x70, 0x64, 0x8c, 0x8d, 0x89, 0xcd,
-	0x9a, 0x02, 0xdf, 0x41, 0x6f, 0x2b, 0xf2, 0x54, 0xad, 0xd5, 0x61, 0x3f, 0x32, 0xc7, 0xc6, 0x64,
-	0x30, 0x77, 0x67, 0x55, 0x3e, 0xfb, 0x72, 0x02, 0xd9, 0x53, 0x1f, 0xdf, 0x80, 0xcd, 0xa5, 0x14,
-	0x72, 0x64, 0xd5, 0xc4, 0x9e, 0x26, 0x52, 0x0d, 0xb0, 0x06, 0xf7, 0xde, 0xc2, 0x30, 0x10, 0xbb,
-	0xea, 0x0f, 0x57, 0x9c, 0xf1, 0xbf, 0x07, 0xbe, 0x57, 0xd7, 0xbf, 0xf5, 0x3c, 0x18, 0xc4, 0xfc,
-	0x98, 0x15, 0xbb, 0x33, 0x8f, 0x80, 0x55, 0xf2, 0x63, 0xcd, 0x72, 0x98, 0x7e, 0x4e, 0x29, 0xf4,
-	0xce, 0x2e, 0xd0, 0x81, 0x76, 0x9c, 0xc4, 0x94, 0xb4, 0xb0, 0x0b, 0x56, 0x4c, 0x7f, 0x12, 0x03,
-	0x5f, 0x40, 0x37, 0xcd, 0x7c, 0x96, 0xd1, 0x90, 0x98, 0x08, 0xd0, 0x59, 0xfa, 0xab, 0x94, 0x86,
-	0xc4, 0xc2, 0x3e, 0x38, 0x8b, 0x28, 0x8e, 0xd2, 0xcf, 0x34, 0x24, 0xed, 0xe9, 0x0f, 0xb0, 0x6b,
-	0x8f, 0xb5, 0x30, 0xfa, 0x56, 0x4f, 0x30, 0x93, 0xaf, 0xe4, 0xce, 0xc0, 0x3e, 0x74, 0x03, 0x46,
-	0x7d, 0x3d, 0xe1, 0xde, 0x40, 0x17, 0x1c, 0x3f, 0x08, 0xe8, 0x52, 0x97, 0x0f, 0x06, 0x0e, 0x01,
-	0x3e, 0xf9, 0x21, 0xa3, 0xdf, 0x57, 0x34, 0xcd, 0xc8, 0x8d, 0xa5, 0xfb, 0x71, 0x92, 0x2d, 0x92,
-	0x55, 0x1c, 0x92, 0x5b, 0x6b, 0xfe, 0x1f, 0xa0, 0xf1, 0xbf, 0x11, 0xf2, 0x17, 0x7e, 0x00, 0x37,
-	0x2a, 0x0b, 0x55, 0xac, 0x15, 0xd7, 0xa8, 0x44, 0xd4, 0xe1, 0x5c, 0xee, 0xf8, 0x9a, 0x68, 0xec,
-	0xf9, 0x51, 0xbc, 0x16, 0x7e, 0x04, 0xf7, 0x14, 0x59, 0x23, 0x7c, 0xd9, 0x90, 0x2e, 0x52, 0xbc,
-	0xa6, 0xcc, 0x3b, 0xf5, 0xad, 0xdf, 0x3f, 0x06, 0x00, 0x00, 0xff, 0xff, 0x9c, 0xf3, 0x93, 0xca,
-	0xfc, 0x01, 0x00, 0x00,
+var fileDescriptor_service_58b98c7d361f9947 = []byte{
+	// 363 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x92, 0xcf, 0xae, 0xd2, 0x40,
+	0x14, 0xc6, 0xef, 0xb4, 0x14, 0xca, 0x81, 0xc2, 0xe4, 0xc4, 0x05, 0x71, 0x23, 0xa9, 0x1b, 0x82,
+	0x09, 0x89, 0x68, 0xe2, 0xba, 0xb6, 0x43, 0xac, 0x9a, 0x16, 0xa7, 0x45, 0xd7, 0x2d, 0x8e, 0x49,
+	0x89, 0x74, 0xea, 0x30, 0xc8, 0x6b, 0xb8, 0xf0, 0x39, 0x7c, 0x0e, 0xf5, 0xa9, 0xcc, 0x94, 0xa0,
+	0x98, 0xb0, 0xb8, 0xbb, 0x9e, 0xef, 0xfc, 0xbe, 0xf3, 0xaf, 0x03, 0xde, 0x41, 0xa8, 0xaf, 0xd5,
+	0x56, 0x2c, 0x1a, 0x25, 0xb5, 0x44, 0xab, 0x29, 0x7d, 0x05, 0xc3, 0x50, 0xd6, 0x9f, 0x2a, 0xb5,
+	0x2f, 0x74, 0x25, 0x6b, 0x7c, 0x00, 0xce, 0x4e, 0x96, 0x71, 0x34, 0x21, 0x53, 0x32, 0x73, 0xf8,
+	0x39, 0xc0, 0x27, 0xd0, 0xdf, 0xc9, 0x32, 0xd3, 0x85, 0x3e, 0x1e, 0x26, 0xd6, 0x94, 0xcc, 0x46,
+	0x4b, 0x6f, 0xd1, 0x94, 0x8b, 0xd7, 0x17, 0x91, 0xff, 0xcb, 0xe3, 0x23, 0x70, 0x84, 0x52, 0x52,
+	0x4d, 0xec, 0x16, 0xec, 0x1b, 0x90, 0x19, 0x81, 0x9f, 0x75, 0xff, 0x31, 0x0c, 0xf2, 0x6a, 0x2f,
+	0xb8, 0xf8, 0x72, 0x14, 0x07, 0x7d, 0xbb, 0xa5, 0xef, 0xc3, 0x28, 0x11, 0xa7, 0x6b, 0x8e, 0x82,
+	0x5d, 0x8b, 0x53, 0x4b, 0xb9, 0xdc, 0x7c, 0xce, 0x19, 0xf4, 0xff, 0x4e, 0x80, 0x2e, 0x74, 0x92,
+	0x34, 0x61, 0xf4, 0x0e, 0x7b, 0x60, 0x27, 0xec, 0x03, 0x25, 0x38, 0x80, 0x5e, 0x96, 0x07, 0x3c,
+	0x67, 0x11, 0xb5, 0x10, 0xa0, 0xbb, 0x0e, 0x36, 0x19, 0x8b, 0xa8, 0x8d, 0x43, 0x70, 0x57, 0x71,
+	0x12, 0x67, 0xaf, 0x58, 0x44, 0x3b, 0xf3, 0xf7, 0xe0, 0xb4, 0xf3, 0xb5, 0xc6, 0xf8, 0x6d, 0x5b,
+	0xc1, 0x4a, 0xdf, 0xd0, 0x9f, 0x04, 0x87, 0xd0, 0x0b, 0x39, 0x0b, 0x4c, 0x85, 0x5f, 0x04, 0x3d,
+	0x70, 0x83, 0x30, 0x64, 0x6b, 0x13, 0xfe, 0x26, 0x38, 0x06, 0x78, 0x19, 0x44, 0x9c, 0xbd, 0xdb,
+	0xb0, 0x2c, 0xa7, 0xdf, 0x6c, 0x93, 0x4f, 0xd2, 0x7c, 0x95, 0x6e, 0x92, 0x88, 0x7e, 0xb7, 0x97,
+	0x3f, 0x08, 0xc0, 0x79, 0x81, 0xad, 0x54, 0x1f, 0xf1, 0x39, 0x78, 0xa1, 0xdc, 0x37, 0x9f, 0x85,
+	0x16, 0x46, 0x55, 0x38, 0x36, 0x97, 0xb9, 0xda, 0xf0, 0x21, 0x35, 0xc2, 0xf5, 0xef, 0xf0, 0xef,
+	0xf0, 0x05, 0x78, 0x71, 0x5d, 0xe9, 0xaa, 0xb8, 0xb8, 0xd0, 0x40, 0xff, 0x9f, 0xe6, 0xa6, 0xf1,
+	0x29, 0x40, 0xa6, 0x0b, 0xa5, 0xef, 0xdf, 0xab, 0xec, 0xb6, 0xef, 0xe2, 0xd9, 0x9f, 0x00, 0x00,
+	0x00, 0xff, 0xff, 0x9f, 0x70, 0x9c, 0x31, 0x28, 0x02, 0x00, 0x00,
 }

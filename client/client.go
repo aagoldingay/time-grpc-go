@@ -25,6 +25,9 @@ func main() {
 	response, err := c.InitiateTimer(context.Background(), &pb.NewTimeRequest{New: true})
 	fmt.Println(response)
 
-	response, err = c.CompleteTimer(context.Background(), &pb.CompleteRequest{JobID: 1})
+	response, err = c.StartTimer(context.Background(), &pb.TimeRequest{JobID: 1})
+	fmt.Println(response)
+
+	response, err = c.CompleteTimer(context.Background(), &pb.TimeRequest{JobID: 1})
 	fmt.Println(response)
 }

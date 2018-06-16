@@ -12,6 +12,9 @@ service TimeRecord {
 
 	// Sends a time request to the server to run a timer
 	rpc StartTimer (TimeRequest) returns (Confirmation) {}
+
+	// Sends a time request to the server to update the status to started or paused
+	rpc UpdateTimer (TimeRequest) returns (Confirmation) {}
 }
 
 enum JobStatus {

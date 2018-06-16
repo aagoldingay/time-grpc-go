@@ -70,6 +70,25 @@ func (s *server) StartTimer(ctx context.Context, in *pb.TimeRequest) (*pb.Confir
 	return &pb.Confirmation{JobID: id, JobStatus: pb.JobStatus_NONE, Error: pb.Error_NOTFOUND}, nil
 }
 
+// UpdateTimer implements pb.TimeRecord - accepts: *pb.TimeRequest
+// Will change the status of a present job to started or paused
+func (s *server) UpdateTimer(ctx context.Context, in *pb.TimeRequest) (*pb.Confirmation, error) {
+	id := in.GetJobID()
+	if _, exists := tasks[id]; exists {
+		if tasks[id].Status == pb.JobStatus_value["STARTED"] {
+			tasks[id].Status = pb.JobStatus_value["PAUSED"]
+			return &pb.Confirmation{JobID: id, JobStatus: pb.JobStatus_PAUSED, Error: pb.Error_OK}, nil
+		}
+		if tasks[id].Status == pb.JobStatus_value["PAUSED"] {
+			tasks[id].Status = pb.JobStatus_value["STARTED"]
+			return &pb.Confirmation{JobID: id, JobStatus: pb.JobStatus_STARTED, Error: pb.Error_OK}, nil
+		}
+		//this return will happen when a task is not started or paused
+		return &pb.Confirmation{JobID: id, JobStatus: pb.JobStatus(tasks[id].Status), Error: pb.Error_BADREQUEST}, nil
+	}
+	return &pb.Confirmation{JobID: id, JobStatus: pb.JobStatus_NONE, Error: pb.Error_NOTFOUND}, nil
+}
+
 // Returns new ID using the length of tasks, as int32
 func getNewID() int32 {
 	return int32(len(tasks) + 1)

@@ -107,3 +107,81 @@ func Test_StartTimerUnsuccessful(t *testing.T) {
 		t.Errorf("StartTimer(%v)=%v, wanted %v", req, resp.JobStatus, pb.JobStatus_NONE)
 	}
 }
+
+func Test_UpdateTimerToStarted(t *testing.T) {
+	s := server{}
+	tasks[1] = &Task{ID: 1, Status: int32(pb.JobStatus_PAUSED), StartTime: time.Now(), TotalTime: 0.00}
+
+	req := &pb.TimeRequest{JobID: 1}
+	resp, err := s.UpdateTimer(context.Background(), req)
+	if err != nil {
+		t.Errorf("UpdateTimer(%v) got unexpected error", req)
+	}
+	if resp.Error != pb.Error_OK {
+		t.Errorf("UpdateTimer(%v)=%v, wanted %v", req, resp.Error, pb.Error_OK)
+	}
+	if resp.JobStatus != pb.JobStatus_STARTED {
+		t.Errorf("UpdateTimer(%v)=%v, wanted %v", req, resp.JobStatus, pb.JobStatus_STARTED)
+	}
+	val, _ := tasks[1]
+	if val.Status != int32(pb.JobStatus_STARTED) {
+		t.Errorf("Task %d status is not started", 1)
+	}
+}
+
+func Test_UpdateTimerToPaused(t *testing.T) {
+	s := server{}
+	tasks[1] = &Task{ID: 1, Status: int32(pb.JobStatus_STARTED), StartTime: time.Now(), TotalTime: 0.00}
+
+	req := &pb.TimeRequest{JobID: 1}
+	resp, err := s.UpdateTimer(context.Background(), req)
+	if err != nil {
+		t.Errorf("UpdateTimer(%v) got unexpected error", req)
+	}
+	if resp.Error != pb.Error_OK {
+		t.Errorf("UpdateTimer(%v)=%v, wanted %v", req, resp.Error, pb.Error_OK)
+	}
+	if resp.JobStatus != pb.JobStatus_PAUSED {
+		t.Errorf("UpdateTimer(%v)=%v, wanted %v", req, resp.JobStatus, pb.JobStatus_PAUSED)
+	}
+	val, _ := tasks[1]
+	if val.Status != int32(pb.JobStatus_PAUSED) {
+		t.Errorf("Task %d status is not paused", 1)
+	}
+}
+
+func Test_UpdateTimerInvalidStatus(t *testing.T) {
+	s := server{}
+	tasks[1] = &Task{ID: 1, Status: int32(pb.JobStatus_FINISHED), StartTime: time.Now(), TotalTime: 0.00}
+
+	req := &pb.TimeRequest{JobID: 1}
+	resp, err := s.UpdateTimer(context.Background(), req)
+	if err != nil {
+		t.Errorf("UpdateTimer(%v) got unexpected error", req)
+	}
+	if resp.Error != pb.Error_BADREQUEST {
+		t.Errorf("UpdateTimer(%v)=%v, wanted %v", req, resp.Error, pb.Error_BADREQUEST)
+	}
+	if resp.JobStatus != pb.JobStatus_FINISHED {
+		t.Errorf("UpdateTimer(%v)=%v, wanted %v", req, resp.JobStatus, pb.JobStatus_FINISHED)
+	}
+	val, _ := tasks[1]
+	if val.Status != int32(pb.JobStatus_FINISHED) {
+		t.Errorf("Task %d status updated", 1)
+	}
+}
+
+func Test_UpdateTimerUnsuccessful(t *testing.T) {
+	s := server{}
+	req := &pb.TimeRequest{JobID: 6}
+	resp, err := s.UpdateTimer(context.Background(), req)
+	if err != nil {
+		t.Errorf("UpdateTimer(%v) got unexpected error", req)
+	}
+	if resp.Error != pb.Error_NOTFOUND {
+		t.Errorf("UpdateTimer(%v)=%v, wanted %v", req, resp.Error, pb.Error_NOTFOUND)
+	}
+	if resp.JobStatus != pb.JobStatus_NONE {
+		t.Errorf("UpdateTimer(%v)=%v, wanted %v", req, resp.JobStatus, pb.JobStatus_NONE)
+	}
+}

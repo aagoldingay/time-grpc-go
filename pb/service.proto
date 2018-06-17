@@ -10,6 +10,9 @@ service TimeRecord {
 	// Sends a time request to the server to initiate a new job record
 	rpc InitiateTimer (NewTimeRequest) returns (Confirmation) {}
 
+	// Requests all timers made either today only, or all
+	rpc ListTimers (ListRequest) returns (ListResponse) {}
+
 	// Sends a time request to the server to run a timer
 	rpc StartTimer (TimeRequest) returns (Confirmation) {}
 
@@ -40,8 +43,22 @@ message Confirmation {
 	Error error = 3;
 }
 
+message ListRequest {
+	bool todayOnly = 1;
+}
+
+message ListResponse {
+	repeated TimerResult result = 1;
+}
+
 message TimeRequest {
 	int32 jobID = 1;
+}
+
+message TimerResult {
+	int32 jobID = 1;
+	JobStatus jobStatus = 2;
+	double totalTime = 3;
 }
 
 message NewTimeRequest {

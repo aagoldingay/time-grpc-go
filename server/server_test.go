@@ -75,6 +75,41 @@ func Test_CompleteTimerUnsuccessful(t *testing.T) {
 		}
 	}
 }
+
+func Test_ListTimersToday(t *testing.T) {
+	s := server{}
+	tasks[1] = &Task{ID: 1, Status: pb.JobStatus_value["FINISHED"], StartTime: time.Now().AddDate(0, 0, -2), TotalTime: 0.10}
+	tasks[2] = &Task{ID: 2, Status: pb.JobStatus_value["PAUSED"], StartTime: time.Now(), TotalTime: 1.10}
+	tasks[3] = &Task{ID: 3, Status: pb.JobStatus_value["STARTED"], StartTime: time.Now(), TotalTime: 0.00}
+	expectedReturn := 2
+
+	req := &pb.ListRequest{TodayOnly: true}
+	resp, err := s.ListTimers(context.Background(), req)
+	if err != nil {
+		t.Errorf("ListTimers(%v) got unexpected error", req)
+	}
+	if len(resp.Result) > expectedReturn {
+		t.Errorf("ListTimers returned more than two results")
+	}
+}
+
+func Test_ListTimersAll(t *testing.T) {
+	s := server{}
+	tasks[1] = &Task{ID: 1, Status: pb.JobStatus_value["FINISHED"], StartTime: time.Now().AddDate(0, 0, -2), TotalTime: 0.10}
+	tasks[2] = &Task{ID: 2, Status: pb.JobStatus_value["PAUSED"], StartTime: time.Now(), TotalTime: 1.10}
+	tasks[3] = &Task{ID: 3, Status: pb.JobStatus_value["STARTED"], StartTime: time.Now(), TotalTime: 0.00}
+	expectedReturn := 3
+
+	req := &pb.ListRequest{TodayOnly: false}
+	resp, err := s.ListTimers(context.Background(), req)
+	if err != nil {
+		t.Errorf("ListTimers(%v) got unexpected error", req)
+	}
+	if len(resp.Result) != expectedReturn {
+		t.Errorf("ListTimers did not return three results")
+	}
+}
+
 func Test_StartTimerSuccessful(t *testing.T) {
 	s := server{}
 	tasks[1] = &Task{ID: 1, TotalTime: 0.00}

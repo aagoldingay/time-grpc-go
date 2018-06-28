@@ -58,6 +58,19 @@ func (s *server) InitiateTimer(ctx context.Context, in *pb.NewTimeRequest) (*pb.
 	return &pb.Confirmation{JobID: id, JobStatus: pb.JobStatus_NEW, Error: pb.Error_CREATED}, nil
 }
 
+// ListTimers implements pb.TimeRecord - accepts *pb.ListRequest
+// Will return all tasks or today's only, based on a bool value in the request
+func (s *server) ListTimers(ctx context.Context, in *pb.ListRequest) (*pb.ListResponse, error) {
+	var list []*pb.TimerResult
+	for _, task := range tasks {
+		if in.TodayOnly && !getStartOfDay(time.Now().Local()).Before(task.StartTime) {
+			continue
+		}
+		list = append(list, &pb.TimerResult{JobID: task.ID, JobStatus: pb.JobStatus(task.Status), TotalTime: task.TotalTime})
+	}
+	return &pb.ListResponse{Result: list}, nil
+}
+
 // StartTimer implements pb.TimeRecord - accepts: *pb.TimeRequest
 func (s *server) StartTimer(ctx context.Context, in *pb.TimeRequest) (*pb.Confirmation, error) {
 	id := in.GetJobID()
@@ -92,6 +105,11 @@ func (s *server) UpdateTimer(ctx context.Context, in *pb.TimeRequest) (*pb.Confi
 // Returns new ID using the length of tasks, as int32
 func getNewID() int32 {
 	return int32(len(tasks) + 1)
+}
+
+// Returns start of the day passed in as a parameter
+func getStartOfDay(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
 }
 
 func main() {

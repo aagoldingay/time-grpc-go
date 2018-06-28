@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.org/aagoldingay/time-grpc-go.svg?branch=dev)](https://travis-ci.org/aagoldingay/time-grpc-go)
+* Master branch: [![Build Status](https://travis-ci.org/aagoldingay/time-grpc-go.svg?branch=master)](https://travis-ci.org/aagoldingay/time-grpc-go)
+* Dev branch:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[![Build Status](https://travis-ci.org/aagoldingay/time-grpc-go.svg?branch=dev)](https://travis-ci.org/aagoldingay/time-grpc-go)
 # time-grpc
 A server implementation and definition of a simple time tracking system.
 
